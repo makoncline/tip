@@ -7,6 +7,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import { TableBody, TableCell, TableRow } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Slider from '@material-ui/core/Slider';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -43,8 +45,10 @@ function KeypadBtn(props) {
 
 function Keypad(props) {
   const classes = useStyles();
+
   return (
     <React.Fragment>
+    { props.visible &&
       <Grid container spacing={1} justify='center' alignItems='center' className={classes.numCol}>
         <Grid item xs={12}>
           <Grid container spacing={1} justify='space-between' alignItems='center' className={classes.numRow}>
@@ -79,6 +83,7 @@ function Keypad(props) {
           </Grid>
         </Grid>
       </Grid>
+    }
     </React.Fragment>
   );
 }
@@ -259,19 +264,176 @@ function TipCalc(props){
 
 function App() {
   const classes = useStyles();
-  const [bill, setBill] = useState('');
+  const [state, setState] = useState({
+    billAmount: 0,
+    taxPercent: 0.1,
+    tax:0,
+    subtotal: 0,
+    tipPercent: 0.15,
+    tip:0,
+    total: 0,
+  });
+
+  const handleChange = name => (event, value) => {
+    let {billAmount, subtotal, total, tipPercent, taxPercent, tax, tip} = state;
+    switch (name){
+      case 'billAmount':
+        billAmount = parseFloat(event.target.value);
+        tax = billAmount * taxPercent;
+        subtotal = billAmount - tax;
+        tip = subtotal * tipPercent;
+        total = billAmount + tip;
+        break;
+      case 'subtotal':
+        subtotal = parseFloat(event.target.value);
+        tax = billAmount - subtotal;
+        taxPercent = tax / billAmount;
+        tip = subtotal * tipPercent;
+        total = billAmount + tip;
+        break;
+      case 'total':
+        total = parseFloat(event.target.value);
+        tip = total - billAmount;
+        tipPercent = tip / subtotal;
+        break;
+      case 'tipPercent':
+        tipPercent = value/100;
+        tip = subtotal * tipPercent;
+        total = billAmount + tip;
+        break;
+      case 'taxPercent':
+        taxPercent = value/100;
+        tax = billAmount * taxPercent;
+        subtotal = billAmount - tax;
+        tip = subtotal * tipPercent;
+        total = billAmount + tip;
+        break;
+      default:
+    }
+    setState({ ...state,
+      billAmount: billAmount,
+      taxPercent: taxPercent,
+      tax: tax,
+      subtotal: subtotal,
+      tipPercent: tipPercent,
+      tip: tip,
+      total: total,
+    });
+  };
 
   return (
     <React.Fragment>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <Container maxWidth='xs' className={classes.root}>
         <Typography variant='h4' component='h1'>Tip</Typography>
-        <BillInput bill={bill} setBill={setBill}/>
-        {/* <TipPercent /> */}
-        <TipCalc billAmount={bill ? parseFloat(bill) : 0} taxPer={0.10} tipPer={0.18} />
+        
+        <TextField
+          id="billAmount"
+          label='Bill Amount'
+          margin="normal"
+          variant="outlined"
+          fullWidth
+          value={state.billAmount > 0 ? formatCurrency(state.billAmount) : ''}
+          onChange={handleChange('billAmount')}
+          type='number'
+          InputProps={
+            state.billAmount > 0 ? {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            } : {}
+          }
+        />
+        <Keypad visible={false}/>
+        <TextField
+          id="subtotal"
+          label='Subtotal'
+          margin="normal"
+          variant="outlined"
+          fullWidth
+          value={state.subtotal > 0 ? formatCurrency(state.subtotal) : ''}
+          onChange={handleChange('subtotal')}
+          type='number'
+          InputProps={
+            state.subtotal > 0 ? {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            } : {}
+          }
+        />
+        <TextField
+          id="tax"
+          label={`Tax (${parseInt(state.taxPercent*100)}%)`}
+          margin="normal"
+          variant="outlined"
+          fullWidth
+          value={state.tax > 0 ? formatCurrency(state.tax) : ''}
+          InputProps={
+            state.tax > 0 ? {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            readOnly: true,
+            } : {readOnly: true,}
+          }
+        />
+        <Slider
+          id='taxSlider'
+          valueLabelDisplay="auto"
+          valueLabelFormat={()=>parseInt(state.taxPercent*100)+'%'}
+          step={1}
+          marks
+          min={0}
+          max={30}
+          value={parseInt(state.taxPercent*100)}
+          onChange={handleChange('taxPercent')}
+        />
+        <TextField
+          id="tip"
+          label={`Tip (${parseInt(state.tipPercent*100)}%)`}
+          margin="normal"
+          variant="outlined"
+          fullWidth
+          value={state.tip > 0 ? formatCurrency(state.tip) : ''}
+          InputProps={
+            state.tip > 0 ? {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            readOnly: true,
+            } : {readOnly: true,}
+          }
+        />
+        <Slider
+          id='tipSlider'
+          valueLabelDisplay="auto"
+          valueLabelFormat={()=>parseInt(state.tipPercent*100)+'%'}
+          step={1}
+          marks
+          min={0}
+          max={30}
+          value={parseInt(state.tipPercent*100)}
+          onChange={handleChange('tipPercent')}
+        />
+        <TextField
+          id="total"
+          label='Total'
+          margin="normal"
+          variant="outlined"
+          fullWidth
+          value={state.total > 0 ? formatCurrency(state.total) : ''}
+          onChange={handleChange('total')}
+          type='number'
+          InputProps={
+            state.total > 0 ? {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            } : {}
+          }
+        />
       </Container>
     </React.Fragment>
   );
+}
+
+function formatCurrency(val){
+  return parseFloat(val.toFixed(2));
+  // .toLocaleString("en-US", { 
+  //   style: "currency", 
+  //   currency: "USD"
+  // });
 }
 
 export default App;
