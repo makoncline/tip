@@ -9,6 +9,8 @@ import { TableBody, TableCell, TableRow } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Slider from '@material-ui/core/Slider';
+import NumberFormat from 'react-number-format';
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -262,6 +264,32 @@ function TipCalc(props){
   );
 }
 
+function NumberFormatCurrency(props) {
+  const { inputRef, onChange, ...other } = props;
+
+  return (
+    <NumberFormat
+      {...other}
+      getInputRef={inputRef}
+      onValueChange={values => {
+        onChange({
+          target: {
+            value: values.value,
+          },
+        });
+      }}
+      thousandSeparator
+      decimalScale={2}
+
+    />
+  );
+}
+
+NumberFormatCurrency.propTypes = {
+  inputRef: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
+
 function App() {
   const classes = useStyles();
   const [state, setState] = useState({
@@ -276,6 +304,7 @@ function App() {
 
   const handleChange = name => (event, value) => {
     let {billAmount, subtotal, total, tipPercent, taxPercent, tax, tip} = state;
+    if (!value && !event.target.value) return;
     switch (name){
       case 'billAmount':
         billAmount = parseFloat(event.target.value);
@@ -310,6 +339,12 @@ function App() {
         break;
       default:
     }
+
+    if (billAmount < 0) return;
+    if (taxPercent < 0) return;
+    if (tipPercent < 0) return;
+    if (total < 0) return;
+
     setState({ ...state,
       billAmount: billAmount,
       taxPercent: taxPercent,
@@ -321,11 +356,67 @@ function App() {
     });
   };
 
+  function handleClick(name){
+    let {billAmount, subtotal, total, tipPercent, taxPercent, tax, tip} = state;
+    switch (name){
+      case 'reset':
+        taxPercent= 0.1;
+        tax= billAmount * taxPercent;
+        subtotal= billAmount - tax;
+        tipPercent= 0.15;
+        tip= subtotal * tipPercent;
+        total= billAmount + tip;
+        break;
+      case 'clear':
+        billAmount= 0;
+        taxPercent= 0.1;
+        tax= 0;
+        subtotal= 0;
+        tipPercent= 0.15;
+        tip= 0;
+        total= 0;
+        break;
+      case 'down':
+        if (!total) return;
+        total = total % 1 !== 0 ? Math.floor(total) : Math.floor(total)-1;
+        tip = total - billAmount;
+        tipPercent = tip / subtotal;
+        break;
+      case 'up':
+        if (!total) return;
+        total = total % 1 !== 0 ? Math.floor(total)+1 : Math.floor(total)+1;
+        tip = total - billAmount;
+        tipPercent = tip / subtotal;
+        break;
+      default:
+    }
+
+    setState({ ...state,
+      billAmount: billAmount,
+      taxPercent: taxPercent,
+      tax: tax,
+      subtotal: subtotal,
+      tipPercent: tipPercent,
+      tip: tip,
+      total: total,
+    });
+  }
+
   return (
     <React.Fragment>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <Container maxWidth='xs' className={classes.root}>
-        <Typography variant='h4' component='h1'>Tip</Typography>
+      <Grid container justify='space-between'>
+          <Grid item xs={6} >
+            <Typography variant='h4' component='h1'>Tip</Typography>
+          </Grid>
+          <Grid item xs={3} >
+            <Button fullWidth onClick={() => handleClick('reset')}>Reset</Button>
+          </Grid>
+          <Grid item xs={3}>
+            <Button fullWidth onClick={() => handleClick('clear')}>Clear</Button>
+          </Grid>
+        </Grid>
         
         <TextField
           id="billAmount"
@@ -333,13 +424,13 @@ function App() {
           margin="normal"
           variant="outlined"
           fullWidth
-          value={state.billAmount > 0 ? formatCurrency(state.billAmount) : ''}
+          value={state.billAmount > 0 ? state.billAmount : ''}
           onChange={handleChange('billAmount')}
-          type='number'
           InputProps={
             state.billAmount > 0 ? {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            } : {}
+            inputComponent: NumberFormatCurrency,
+            } : {inputComponent: NumberFormatCurrency,}
           }
         />
         <Keypad visible={false}/>
@@ -351,11 +442,11 @@ function App() {
           fullWidth
           value={state.subtotal > 0 ? formatCurrency(state.subtotal) : ''}
           onChange={handleChange('subtotal')}
-          type='number'
           InputProps={
             state.subtotal > 0 ? {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            } : {}
+            inputComponent: NumberFormatCurrency,
+            } : {inputComponent: NumberFormatCurrency,}
           }
         />
         <TextField
@@ -369,7 +460,12 @@ function App() {
             state.tax > 0 ? {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
             readOnly: true,
-            } : {readOnly: true,}
+            inputComponent: NumberFormatCurrency,
+            } : 
+            {
+              readOnly: true,
+              inputComponent: NumberFormatCurrency,  
+            }
           }
         />
         <Slider
@@ -394,7 +490,12 @@ function App() {
             state.tip > 0 ? {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
             readOnly: true,
-            } : {readOnly: true,}
+            inputComponent: NumberFormatCurrency,
+            } : 
+            {
+              readOnly: true,
+              inputComponent: NumberFormatCurrency,
+            }
           }
         />
         <Slider
@@ -416,13 +517,27 @@ function App() {
           fullWidth
           value={state.total > 0 ? formatCurrency(state.total) : ''}
           onChange={handleChange('total')}
-          type='number'
           InputProps={
             state.total > 0 ? {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            } : {}
+            inputComponent: NumberFormatCurrency,
+            } : 
+            {
+              inputComponent: NumberFormatCurrency,
+            }
           }
         />
+        <Grid container justify='space-between'>
+          <Grid item xs={3} >
+            <Button fullWidth variant='outlined' onClick={() => handleClick('down')}>Down</Button>
+          </Grid>
+          <Grid item xs={6} >
+            <Button fullWidth >Round Total</Button>
+          </Grid>
+          <Grid item xs={3}>
+            <Button fullWidth variant='outlined' onClick={() => handleClick('up')}>Up</Button>
+          </Grid>
+        </Grid>
       </Container>
     </React.Fragment>
   );
