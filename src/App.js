@@ -280,6 +280,7 @@ function NumberFormatCurrency(props) {
       }}
       thousandSeparator
       decimalScale={2}
+      type='number'
 
     />
   );
