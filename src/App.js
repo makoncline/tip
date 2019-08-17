@@ -65,60 +65,53 @@ function App() {
   const [state, setState] = useState({
     billAmount: 0,
     taxPercent: 0.1,
-    tax:0,
-    subtotal: 0,
     tipPercent: 0.18,
-    tip:0,
-    total: 0,
   });
 
   const handleChange = name => (event, value) => {
-    let {billAmount, subtotal, total, tipPercent, taxPercent, tax, tip} = state;
+    let { billAmount, tipPercent, taxPercent } = state;
+
 
     if (!value && !event.target.value) return;
-    switch (name){
+    switch (name) {
       case 'billAmount':
         billAmount = parseFloat(event.target.value);
-        tax = billAmount * taxPercent;
-        subtotal = billAmount - tax;
-        tip = subtotal * tipPercent;
-        total = billAmount + tip;
         break;
       case 'subtotal':
-        subtotal = parseFloat(event.target.value);
-        tax = billAmount - subtotal;
-        taxPercent = tax / billAmount;
-        tip = subtotal * tipPercent;
-        total = billAmount + tip;
+        {
+          let subtotal = parseFloat(event.target.value);
+          let tax = billAmount - subtotal;
+          taxPercent = tax / billAmount;
+        }
         break;
       case 'total':
-        total = parseFloat(event.target.value);
-        tip = total - billAmount;
-        tipPercent = tip / subtotal;
+        {
+          let total = parseFloat(event.target.value);
+          let tip = total - billAmount;
+          let tax = billAmount * taxPercent;
+          let subtotal = billAmount - tax;
+          tipPercent = tip / subtotal;
+        }
         break;
       case 'tip':
-        tip = parseFloat(event.target.value);
-        tipPercent = tip / subtotal;
-        total = billAmount + tip;
+        {
+          let tip = parseFloat(event.target.value);
+          let tax = billAmount * taxPercent;
+          let subtotal = billAmount - tax;
+          tipPercent = tip / subtotal;
+        }
         break;
       case 'tax':
-        tax = parseFloat(event.target.value);
-        subtotal = billAmount - tax;
-        taxPercent = tax / billAmount;
-        tip = subtotal * tipPercent;
-        total = billAmount + tip;
+        {
+          let tax = parseFloat(event.target.value);
+          taxPercent = tax / billAmount;
+        }
         break;
       case 'tipPercent':
-        tipPercent = value/100;
-        tip = subtotal * tipPercent;
-        total = billAmount + tip;
+        tipPercent = value / 100;
         break;
       case 'taxPercent':
-        taxPercent = value/100;
-        tax = billAmount * taxPercent;
-        subtotal = billAmount - tax;
-        tip = subtotal * tipPercent;
-        total = billAmount + tip;
+        taxPercent = value / 100;
         break;
       default:
     }
@@ -126,70 +119,75 @@ function App() {
     if (billAmount < 0) return;
     if (taxPercent < 0) return;
     if (tipPercent < 0) return;
-    if (total < 0) return;
 
-    setState({ ...state,
+    setState({
+      ...state,
       billAmount: billAmount,
       taxPercent: taxPercent,
-      tax: tax,
-      subtotal: subtotal,
       tipPercent: tipPercent,
-      tip: tip,
-      total: total,
     });
   };
 
-  function handleClick(name){
-    let {billAmount, subtotal, total, tipPercent, taxPercent, tax, tip} = state;
-    switch (name){
+  const TIP_PERCENT = 0.18;
+  const TAX_PERCENT = 0.1;
+
+  function handleClick(name) {
+    let { billAmount, tipPercent, taxPercent } = state;
+    switch (name) {
       case 'reset':
-        taxPercent= 0.1;
-        tax= billAmount * taxPercent;
-        subtotal= billAmount - tax;
-        tipPercent= 0.18;
-        tip= subtotal * tipPercent;
-        total= billAmount + tip;
+        taxPercent = TAX_PERCENT;
+        tipPercent = TIP_PERCENT;
         break;
       case 'clear':
-        billAmount= 0;
-        taxPercent= 0.1;
-        tax= 0;
-        subtotal= 0;
-        tipPercent= 0.18;
-        tip= 0;
-        total= 0;
+        billAmount = 0;
+        taxPercent = TAX_PERCENT;
+        tipPercent = TIP_PERCENT;
         break;
       case 'down':
-        if (!total) return;
-        total = total % 1 !== 0 ? Math.floor(total) : Math.floor(total)-1;
-        tip = total - billAmount;
-        tipPercent = tip / subtotal;
+        {
+          let tax = billAmount * taxPercent;
+          let subtotal = billAmount - tax;
+          let tip = subtotal * tipPercent;
+          let total = billAmount + tip;
+          if (!total) return;
+          total = total % 1 !== 0 ? Math.floor(total) : Math.floor(total) - 1;
+          tip = total - billAmount;
+          tipPercent = tip / subtotal;
+        }
         break;
       case 'up':
-        if (!total) return;
-        total = total % 1 !== 0 ? Math.floor(total)+1 : Math.floor(total)+1;
-        tip = total - billAmount;
-        tipPercent = tip / subtotal;
+        {
+          let tax = billAmount * taxPercent;
+          let subtotal = billAmount - tax;
+          let tip = subtotal * tipPercent;
+          let total = billAmount + tip;
+          if (!total) return;
+          total = total % 1 !== 0 ? Math.floor(total) + 1 : Math.floor(total) + 1;
+          tip = total - billAmount;
+          tipPercent = tip / subtotal;
+        }
         break;
       default:
     }
 
-    setState({ ...state,
+    setState({
+      ...state,
       billAmount: billAmount,
       taxPercent: taxPercent,
-      tax: tax,
-      subtotal: subtotal,
       tipPercent: tipPercent,
-      tip: tip,
-      total: total,
     });
   }
+
+  let tax = state.billAmount * state.taxPercent;
+  let subtotal = state.billAmount - tax;
+  let tip = subtotal * state.tipPercent;
+  let total = state.billAmount + tip;
 
   return (
     <React.Fragment>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <Container maxWidth='xs' className={classes.root}>
-      <Grid container justify='space-between'>
+        <Grid container justify='space-between'>
           <Grid item xs={6} >
             <Typography variant='h4' component='h1'>Tip</Typography>
           </Grid>
@@ -200,7 +198,7 @@ function App() {
             <Button fullWidth onClick={() => handleClick('clear')}>Clear</Button>
           </Grid>
         </Grid>
-        
+
         <TextField
           id="billAmount"
           label='Bill Amount'
@@ -211,9 +209,9 @@ function App() {
           onChange={handleChange('billAmount')}
           InputProps={
             state.billAmount > 0 ? {
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            inputComponent: NumberFormatCurrency,
-            } : {inputComponent: NumberFormatCurrency,}
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              inputComponent: NumberFormatCurrency,
+            } : { inputComponent: NumberFormatCurrency, }
           }
         />
         <TextField
@@ -222,75 +220,75 @@ function App() {
           margin="normal"
           variant="outlined"
           fullWidth
-          value={state.subtotal > 0 ? state.subtotal : ''}
+          value={subtotal > 0 ? subtotal : ''}
           onChange={handleChange('subtotal')}
           InputProps={
             state.subtotal > 0 ? {
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            inputComponent: NumberFormatCurrency,
-            } : {inputComponent: NumberFormatCurrency,}
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              inputComponent: NumberFormatCurrency,
+            } : { inputComponent: NumberFormatCurrency, }
           }
         />
         <TextField
           id="tax"
-          label={`Tax (${(state.taxPercent*100).toFixed(2)}%)`}
+          label={`Tax (${(state.taxPercent * 100).toFixed(2)}%)`}
           margin="normal"
           variant="outlined"
           fullWidth
-          value={state.tax > 0 ? state.tax : ''}
+          value={tax > 0 ? tax : ''}
           onChange={handleChange('tax')}
           InputProps={
             state.tax > 0 ? {
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            readOnly: true,
-            inputComponent: NumberFormatCurrency,
-            } : 
-            {
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
               readOnly: true,
-              inputComponent: NumberFormatCurrency,  
-            }
+              inputComponent: NumberFormatCurrency,
+            } :
+              {
+                readOnly: true,
+                inputComponent: NumberFormatCurrency,
+              }
           }
         />
         <Slider
           id='taxSlider'
           valueLabelDisplay="auto"
-          valueLabelFormat={()=>parseInt(state.taxPercent*100)+'%'}
+          valueLabelFormat={() => parseInt(state.taxPercent * 100) + '%'}
           step={1}
           marks
           min={0}
           max={30}
-          value={parseInt(state.taxPercent*100)}
+          value={parseInt(state.taxPercent * 100)}
           onChange={handleChange('taxPercent')}
         />
         <TextField
           id="tip"
-          label={`Tip (${(state.tipPercent*100).toFixed(2)}%)`}
+          label={`Tip (${(state.tipPercent * 100).toFixed(2)}%)`}
           margin="normal"
           variant="outlined"
           fullWidth
-          value={state.tip > 0 ? state.tip : ''}
+          value={tip > 0 ? tip : ''}
           onChange={handleChange('tip')}
           InputProps={
             state.tip > 0 ? {
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            readOnly: true,
-            inputComponent: NumberFormatCurrency,
-            } : 
-            {
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
               readOnly: true,
               inputComponent: NumberFormatCurrency,
-            }
+            } :
+              {
+                readOnly: true,
+                inputComponent: NumberFormatCurrency,
+              }
           }
         />
         <Slider
           id='tipSlider'
           valueLabelDisplay="auto"
-          valueLabelFormat={()=>parseInt(state.tipPercent*100)+'%'}
+          valueLabelFormat={() => parseInt(state.tipPercent * 100) + '%'}
           step={1}
           marks
           min={0}
           max={30}
-          value={parseInt(state.tipPercent*100)}
+          value={parseInt(state.tipPercent * 100)}
           onChange={handleChange('tipPercent')}
         />
         <TextField
@@ -299,16 +297,16 @@ function App() {
           margin="normal"
           variant="outlined"
           fullWidth
-          value={state.total > 0 ? state.total : ''}
+          value={total > 0 ? total : ''}
           onChange={handleChange('total')}
           InputProps={
             state.total > 0 ? {
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            inputComponent: NumberFormatCurrency,
-            } : 
-            {
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
               inputComponent: NumberFormatCurrency,
-            }
+            } :
+              {
+                inputComponent: NumberFormatCurrency,
+              }
           }
         />
         <Grid container justify='space-between'>
