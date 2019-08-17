@@ -84,15 +84,15 @@ function App() {
           taxPercent = tax / billAmount;
         }
         break;
-      case 'total':
-        {
-          let total = parseFloat(event.target.value);
-          let tip = total - billAmount;
-          let tax = billAmount * taxPercent;
-          let subtotal = billAmount - tax;
-          tipPercent = tip / subtotal;
-        }
-        break;
+      // case 'total':
+      //   {
+      //     let total = parseFloat(event.target.value);
+      //     let tip = total - billAmount;
+      //     let tax = billAmount * taxPercent;
+      //     let subtotal = billAmount - tax;
+      //     tipPercent = tip / subtotal;
+      //   }
+      //   break;
       case 'tip':
         {
           let tip = parseFloat(event.target.value);
@@ -240,11 +240,9 @@ function App() {
           InputProps={
             state.tax > 0 ? {
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              readOnly: true,
               inputComponent: NumberFormatCurrency,
             } :
               {
-                readOnly: true,
                 inputComponent: NumberFormatCurrency,
               }
           }
@@ -271,11 +269,9 @@ function App() {
           InputProps={
             state.tip > 0 ? {
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              readOnly: true,
               inputComponent: NumberFormatCurrency,
             } :
               {
-                readOnly: true,
                 inputComponent: NumberFormatCurrency,
               }
           }
@@ -303,9 +299,11 @@ function App() {
             state.total > 0 ? {
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
               inputComponent: NumberFormatCurrency,
+              readOnly: true,
             } :
               {
                 inputComponent: NumberFormatCurrency,
+                readOnly: true,
               }
           }
         />
