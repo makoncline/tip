@@ -9,6 +9,11 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Slider from '@material-ui/core/Slider';
 import NumberFormat from 'react-number-format';
 import PropTypes from 'prop-types';
+import Box from '@material-ui/core/Box';
+import { ThemeProvider } from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -67,10 +72,16 @@ function App() {
     taxPercent: 0.1,
     tipPercent: 0.18,
   });
+  const [dark, setDark] = useState(true);
+
+  const darkTheme = createMuiTheme({
+    palette: {
+      type: dark ? 'dark' : 'light',
+    },
+  });
 
   const handleChange = name => (event, value) => {
     let { billAmount, tipPercent, taxPercent } = state;
-
 
     if (!value && !event.target.value) return;
     switch (name) {
@@ -167,6 +178,9 @@ function App() {
           tipPercent = tip / subtotal;
         }
         break;
+      case 'dark':
+        setDark(!dark);
+        break;
       default:
     }
 
@@ -185,11 +199,18 @@ function App() {
 
   return (
     <React.Fragment>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-      <Container maxWidth='xs' className={classes.root}>
-        <Grid container justify='space-between'>
-          <Grid item xs={6} >
+    <CssBaseline />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <Box maxWidth='xs' className={classes.root}>
+    <Container maxWidth='80%'>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+        <Grid container justify='space-between' >
+          <Grid item xs={3} >
             <Typography variant='h4' component='h1'>Tip</Typography>
+          </Grid>
+          <Grid item xs={3} >
+            <Button fullWidth onClick={() => handleClick('dark')}><Brightness4Icon/></Button>
           </Grid>
           <Grid item xs={3} >
             <Button fullWidth onClick={() => handleClick('reset')}>Reset</Button>
@@ -198,7 +219,6 @@ function App() {
             <Button fullWidth onClick={() => handleClick('clear')}>Clear</Button>
           </Grid>
         </Grid>
-
         <TextField
           id="billAmount"
           label='Bill Amount'
@@ -318,7 +338,9 @@ function App() {
             <Button fullWidth variant='outlined' onClick={() => handleClick('up')}>Up</Button>
           </Grid>
         </Grid>
-      </Container>
+    </ThemeProvider>
+    </Container>
+    </Box>
     </React.Fragment>
   );
 }
