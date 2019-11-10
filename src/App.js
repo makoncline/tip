@@ -200,7 +200,6 @@ function App() {
   return (
     <React.Fragment>
     <CssBaseline />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
     <Box maxWidth='xs' className={classes.root}>
     <Container maxWidth='80%'>
     <ThemeProvider theme={darkTheme}>
@@ -210,13 +209,13 @@ function App() {
             <Typography variant='h4' component='h1'>Tip</Typography>
           </Grid>
           <Grid item xs={3} >
-            <Button fullWidth onClick={() => handleClick('dark')}><Brightness4Icon/></Button>
+            <Button aria-label="Dark mode" fullWidth onClick={() => handleClick('dark')}><Brightness4Icon/></Button>
           </Grid>
           <Grid item xs={3} >
-            <Button fullWidth onClick={() => handleClick('reset')}>Reset</Button>
+            <Button aria-label="Reset" fullWidth onClick={() => handleClick('reset')}>Reset</Button>
           </Grid>
           <Grid item xs={3}>
-            <Button fullWidth onClick={() => handleClick('clear')}>Clear</Button>
+            <Button aria-label="Clear" fullWidth onClick={() => handleClick('clear')}>Clear</Button>
           </Grid>
         </Grid>
         <TextField
@@ -329,13 +328,13 @@ function App() {
         />
         <Grid container justify='space-between'>
           <Grid item xs={3} >
-            <Button fullWidth variant='outlined' onClick={() => handleClick('down')}>Down</Button>
+            <Button aria-label="Round down" fullWidth variant='outlined' onClick={() => handleClick('down')}>Down</Button>
           </Grid>
           <Grid item xs={6} >
-            <Button fullWidth >Round Total</Button>
+            <Button aria-label="Round total" fullWidth >Round Total</Button>
           </Grid>
           <Grid item xs={3}>
-            <Button fullWidth variant='outlined' onClick={() => handleClick('up')}>Up</Button>
+            <Button aria-label="Round up" fullWidth variant='outlined' onClick={() => handleClick('up')}>Up</Button>
           </Grid>
         </Grid>
     </ThemeProvider>
